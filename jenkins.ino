@@ -40,7 +40,10 @@ void loop() {
    * - aPressed : Is the A key being pressed on the website?
    * - sPressed : Is the S key being pressed on the website?
    * - dPressed : Is the D key being pressed on the website?
-   * - 
+   * - AutonomousMode : Should the car do something on its own?
+   * - goToNextGame : Is the car constructed to go to the next game?
+   * - gameNumber : The number the game should play when it is in autonomous mode
+   *   - This will be '1' for the Maze and '2' for the Rat Race
    */
 
   // If we are in autonomous mode (we are NOT controlling)
