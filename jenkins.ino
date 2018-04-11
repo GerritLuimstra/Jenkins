@@ -1,43 +1,72 @@
-// Require all the libs
+// Require all them libs
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <SoftwareSerial.h>
+#include "lib/infrared.h"
 #include "lib/helper.h"
-#include "lib/lcd.h"
 #include "lib/engine.h"
-#include "lib/bluetooth.h"
 #include "lib/pinger.h"
-
-// Set the LCD address to 0x27 for a 16 chars and 2 line display
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+#include "lib/bluetooth.h"
+#include "lib/lcd.h"
+#include "lib/games.h"
 
 void setup() {
 
-  // Enable the serial port to display log messages
-  Serial.begin(9600);
-    
-  // initialize the LCD
-  lcd.begin();
-  
-  // Turn on the blacklight
-  lcd.backlight();
-  
-  // Show the init message
-  lcd.print("Jenkins - Ready");
-  delay(1000);
-  lcd.clear();
-  lcd.print("Jenkins - ");
-  lcd.print("Engine booting up");
-  delay(2000);
+  // Give that good ol' engine a swing
+  setupEngine();
+
+  // Initialize the LCD
+  initLCD();
+
+  // Prepare the bluetooth module for receiving data
+  prepareBluetooth();
+
+  // Prepare the infra red sensors
+  prepareInfraRed();
+
+  // Enable the printing of messages in the console
+  Serial.begin(38400);
+  Serial.setTimeout(0);
 }
 
 void loop() {
-  lcd.clear();
-  /*
-   * Pinger code
-   */
-   if(object_detected(10)){
-      lcd.print("Detected");
-   } else {
-      lcd.print("Not Detected");
-   }
+  
+  // If there is new bluetooth data, set the new commands
+  while(bluetoothAvailable()) setCommandVariables();
 
-   delay(1000);
+  /*
+   * Available variables (commands):
+   * - wPressed : Is the W key being pressed on the website?
+   * - aPressed : Is the A key being pressed on the website?
+   * - sPressed : Is the S key being pressed on the website?
+   * - dPressed : Is the D key being pressed on the website?
+   * - 
+   */
+
+  // If we are in autonomous mode (we are NOT controlling)
+  if(AutonomousMode){
+
+      // If the go to the next game bit is active
+      if(goToNextGame){
+
+        // We should just go straight
+        straight();
+        
+      } else {
+         if(gameNumber == '1'){
+            theMaze();
+         }
+         if(gameNumber == '2'){
+            ratRace();
+         }
+      }
+      
+   } else {
+      // Self explanatory control code
+      if(wPressed) straight();
+      if(sPressed) reverse();
+      if(aPressed) left();
+      if(dPressed) right();
+      if(!wPressed and !sPressed and !aPressed and !dPressed) halt();
+   }
 }
